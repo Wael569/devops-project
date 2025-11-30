@@ -47,7 +47,7 @@ pipeline {
 
         stage('Archive Artifacts') {
             steps {
-                archiveArtifacts artifacts: 'build/**'
+                archiveArtifacts artifacts: 'dist/**'
             }
         }
     }
