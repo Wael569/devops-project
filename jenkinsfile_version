@@ -17,7 +17,7 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                bat "docker build -t YOUR_DOCKER_USER/react-app:%VERSION% ."
+                bat "docker build -t wael75613/react-app:%VERSION% ."
             }
         }
 
