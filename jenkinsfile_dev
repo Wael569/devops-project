@@ -6,7 +6,7 @@ pipeline {
 
         stage('Docker Build :latest') {
             steps {
-                bat 'docker build -t YOUR_DOCKER_USER/react-app:latest .'
+                bat 'docker build -t wael75613/react-app:latest .'
             }
         }
 
@@ -16,7 +16,7 @@ pipeline {
                   usernameVariable: 'USER', passwordVariable: 'PASS')]) {
 
                     bat 'docker login -u %USER% -p %PASS%'
-                    bat 'docker push YOUR_DOCKER_USER/react-app:latest'
+                    bat 'docker push wael75613/react-app:latest'
                 }
             }
         }
