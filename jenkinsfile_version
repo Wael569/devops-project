@@ -1,23 +1,36 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_USER = 'wael75613' // ton DockerHub username
+    }
+
     stages {
 
         stage('Checkout') {
             steps { checkout scm }
         }
 
+        stage('Build ReactJS') {
+            steps {
+                bat 'npm install'
+                bat 'npm run build'
+            }
+        }
+
         stage('Get version from tag') {
             steps {
                 script {
-                    VERSION = env.GIT_TAG_NAME
+                    // Si env.GIT_TAG_NAME est vide, utiliser 'latest'
+                    VERSION = env.GIT_TAG_NAME ?: 'latest'
+                    echo "Using version: ${VERSION}"
                 }
             }
         }
 
         stage('Docker Build') {
             steps {
-                bat "docker build -t wael75613/react-app:%VERSION% ."
+                bat "docker build -t %DOCKER_USER%/react-app:%VERSION% ."
             }
         }
 
@@ -25,9 +38,8 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', 
                  usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-
                     bat "docker login -u %USER% -p %PASS%"
-                    bat "docker push YOUR_DOCKER_USER/react-app:%VERSION%"
+                    bat "docker push %DOCKER_USER%/react-app:%VERSION%"
                 }
             }
         }
