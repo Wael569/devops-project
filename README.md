@@ -23,3 +23,4 @@ If you are developing a production application, we recommend using TypeScript wi
 "test dev" 
 "Test dev pipeline" 
 "Testing Dev Pipeline" 
+"update dev" 
