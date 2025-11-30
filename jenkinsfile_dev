@@ -22,11 +22,15 @@ pipeline {
         }
 
         stage('Run') {
-            steps {
-                bat 'docker run -d --name react-latest -p 80:80 YOUR_DOCKER_USER/react-app:latest'
-                bat 'timeout /t 5'
-            }
-        }
+   	    steps {
+	        // Run container using the image you just built & pushed
+       		 bat 'docker run -d --name react-latest -p 80:80 wael75613/react-app:latest'
+
+        	// Safe sleep
+	        sleep time: 5, unit: 'SECONDS'
+	  }
+	}
+
 
         stage('Smoke Test') {
             steps { bat 'smoke-test.bat' }
