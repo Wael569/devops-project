@@ -2,7 +2,23 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout') { steps { checkout scm } }
+
+        stage('Checkout') { 
+            steps { checkout scm } 
+        }
+
+        stage('Build React') {
+            steps {
+                bat 'npm install'
+                bat 'npm run build'   // creates dist/
+            }
+        }
+
+        stage('Archive') {
+            steps { 
+                archiveArtifacts 'dist/**' 
+            }
+        }
 
         stage('Docker Build :latest') {
             steps {
@@ -14,7 +30,6 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', 
                   usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-
                     bat 'docker login -u %USER% -p %PASS%'
                     bat 'docker push wael75613/react-app:latest'
                 }
@@ -22,22 +37,17 @@ pipeline {
         }
 
         stage('Run') {
-   	    steps {
-	        // Run container using the image you just built & pushed
-       		 bat 'docker run -d --name react-latest -p 80:80 wael75613/react-app:latest'
-
-        	// Safe sleep
-	        sleep time: 5, unit: 'SECONDS'
-	  }
-	}
-
-
-        stage('Smoke Test') {
-            steps { bat 'smoke_test.bat' }
+            steps {
+                bat 'docker rm -f react-latest || exit 0'
+                bat 'docker run -d --name react-latest -p 80:80 wael75613/react-app:latest'
+                sleep time: 5, unit: 'SECONDS'
+            }
         }
 
-        stage('Archive') {
-            steps { archiveArtifacts 'dist/**' }
+        stage('Smoke Test') {
+            steps { 
+                bat 'smoke_test.bat' 
+            }
         }
     }
 
