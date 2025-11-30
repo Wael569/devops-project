@@ -37,7 +37,7 @@ pipeline {
         }
 
         stage('Archive') {
-            steps { archiveArtifacts 'build/**' }
+            steps { archiveArtifacts 'dist/**' }
         }
     }
 
