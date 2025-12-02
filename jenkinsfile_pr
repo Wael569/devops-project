@@ -1,0 +1,54 @@
+pipeline {
+    agent any
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build React') {
+            steps {
+                bat 'npm install'
+                bat 'npm run build'
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                bat 'docker build -t react-app-pr .'
+            }
+        }
+
+        stage('Run Container') {
+            steps {
+		// Delete old container safely
+        	bat 'docker rm -f react-pr || exit 0'
+                bat 'docker run -d --name react-pr -p 80:80 react-app-pr'
+                sleep time: 5, unit: 'SECONDS'
+
+
+            }
+        }
+
+        stage('Smoke Test') {
+            steps {
+                bat 'smoke_test.bat'
+            }
+        }
+
+        stage('Cleanup') {
+            steps {
+                bat 'docker rm -f react-pr || exit 0'
+            }
+        }
+
+        stage('Archive Artifacts') {
+            steps {
+                archiveArtifacts artifacts: 'dist/**'
+            }
+        }
+    }
+}

@@ -1,0 +1,55 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_USER = 'wael75613' // ton DockerHub username
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps { checkout scm }
+        }
+
+        stage('Build ReactJS') {
+            steps {
+                bat 'npm install'
+                bat 'npm run build'
+            }
+        }
+
+        stage('Get version from tag') {
+            steps {
+                script {
+                    // VERSION est une variable locale du script
+                    def VERSION = env.GIT_TAG_NAME ?: 'latest'
+                    echo "Using version: ${VERSION}"
+
+                    // Stocke VERSION dans env pour qu'il soit disponible dans les prochains stages
+                    env.VERSION = VERSION
+                }
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                // Utiliser env.VERSION pour bat
+                bat "docker build -t %DOCKER_USER%/react-app:%VERSION% ."
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', 
+                 usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    bat "docker login -u %USER% -p %PASS%"
+                    bat "docker push %DOCKER_USER%/react-app:%VERSION%"
+                }
+            }
+        }
+
+        stage('Archive') {
+            steps { archiveArtifacts 'dist/**' }
+        }
+    }
+}
